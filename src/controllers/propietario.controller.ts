@@ -1,3 +1,4 @@
+import {service} from '@loopback/core';
 import {
   Count,
   CountSchema,
@@ -8,17 +9,58 @@ import {
 } from '@loopback/repository';
 import {
   del, get,
-  getModelSchemaRef, param, patch, post, put, requestBody,
+  getModelSchemaRef, HttpErrors, param, patch, post, put, requestBody,
   response
 } from '@loopback/rest';
-import {Propietario} from '../models';
+import fetch from 'node-fetch';
+import {Llaves} from '../config/llaves';
+import {Credenciales, Propietario} from '../models';
 import {PropietarioRepository} from '../repositories';
+import {AutenticacionService} from '../services';
 
 export class PropietarioController {
   constructor(
     @repository(PropietarioRepository)
     public propietarioRepository: PropietarioRepository,
+    @service(AutenticacionService)
+    public servicioAutenticacion: AutenticacionService
   ) { }
+
+
+  @post("/identificarPropietario", {
+
+    responses: {
+
+      '200': {
+        description: "Identificacion de Propietario"
+      }
+    }
+
+  })
+  async identificarPropietario(
+
+    @requestBody() credenciales: Credenciales
+
+  ) {
+
+    let p = await this.servicioAutenticacion.IdentificarPropietario(credenciales.Usuario, credenciales.Clave);
+    if (p) {
+      let token = this.servicioAutenticacion.GenerarTokenJWT(p);
+      return {
+        datos: {
+          nombre: p.Nombre,
+          correo: p.Correo,
+          id: p.Id
+        },
+        tk: token
+      }
+    } else {
+
+      throw new HttpErrors[401]("Datos Invalidos");
+    }
+
+  }
+
 
   @post('/propietarios')
   @response(200, {
@@ -38,7 +80,27 @@ export class PropietarioController {
     })
     propietario: Omit<Propietario, 'id'>,
   ): Promise<Propietario> {
-    return this.propietarioRepository.create(propietario);
+
+    let clave = this.servicioAutenticacion.GenerarClave();
+    let claveCifrada = this.servicioAutenticacion.CifrarClave(clave);
+    propietario.Contrasenia = claveCifrada;
+    let p = await this.propietarioRepository.create(propietario);
+
+    // Notificar al usuario
+
+    let destino = propietario.Correo;
+    let asunto = 'Registro en la plataforma';
+    let contenido = `Hola ${propietario.Nombre}, su nombre de usuario es ${propietario.Correo}, y su contraseña es ${clave}`;
+
+    fetch(`${Llaves.urlServicioNotificaciones}/email?destino=${destino}&asunto=${asunto}&contenido=${contenido}`)
+      .then((data: any) => {
+
+        console.log(data)
+
+      })
+
+
+    return p;
   }
 
   @get('/propietarios/count')
@@ -141,4 +203,6 @@ export class PropietarioController {
   async deleteById(@param.path.string('id') id: string): Promise<void> {
     await this.propietarioRepository.deleteById(id);
   }
+
+
 }

@@ -1,6 +1,6 @@
-import {Entity, model, property, hasMany} from '@loopback/repository';
-import {Vehiculo} from './vehiculo.model';
+import {Entity, hasMany, model, property} from '@loopback/repository';
 import {SolicitudRevision} from './solicitud-revision.model';
+import {Vehiculo} from './vehiculo.model';
 
 @model()
 export class Propietario extends Entity {
@@ -49,7 +49,7 @@ export class Propietario extends Entity {
 
   @property({
     type: 'string',
-    required: true,
+    required: false,
   })
   Contrasenia: string;
 
