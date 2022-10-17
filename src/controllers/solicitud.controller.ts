@@ -1,3 +1,4 @@
+import {authenticate} from '@loopback/authentication';
 import {
   Count,
   CountSchema,
@@ -14,6 +15,8 @@ import {
 import {SolicitudRevision} from '../models';
 import {SolicitudRevisionRepository} from '../repositories';
 
+
+@authenticate("userProp")
 export class SolicitudController {
   constructor(
     @repository(SolicitudRevisionRepository)
@@ -41,6 +44,7 @@ export class SolicitudController {
     return this.solicitudRevisionRepository.create(solicitudRevision);
   }
 
+  @authenticate.skip()
   @get('/solicitud-revisions/count')
   @response(200, {
     description: 'SolicitudRevision model count',
@@ -52,6 +56,7 @@ export class SolicitudController {
     return this.solicitudRevisionRepository.count(where);
   }
 
+  @authenticate.skip()
   @get('/solicitud-revisions')
   @response(200, {
     description: 'Array of SolicitudRevision model instances',
