@@ -1,6 +1,7 @@
 import {Entity, model, property, belongsTo, hasOne} from '@loopback/repository';
 import {Propietario} from './propietario.model';
 import {SolicitudRevision} from './solicitud-revision.model';
+import {Revision} from './revision.model';
 
 @model()
 export class Vehiculo extends Entity {
@@ -58,6 +59,14 @@ export class Vehiculo extends Entity {
 
   @hasOne(() => SolicitudRevision)
   solicitudRevision: SolicitudRevision;
+
+  @hasOne(() => Revision)
+  revision: Revision;
+
+  @property({
+    type: 'string',
+  })
+  revisionId?: string;
 
   constructor(data?: Partial<Vehiculo>) {
     super(data);

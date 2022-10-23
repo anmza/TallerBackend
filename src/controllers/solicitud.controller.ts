@@ -16,7 +16,7 @@ import {SolicitudRevision} from '../models';
 import {SolicitudRevisionRepository} from '../repositories';
 
 
-@authenticate("userProp")
+//@authenticate("userProp")
 export class SolicitudController {
   constructor(
     @repository(SolicitudRevisionRepository)

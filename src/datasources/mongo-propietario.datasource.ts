@@ -4,7 +4,7 @@ import {juggler} from '@loopback/repository';
 const config = {
   name: 'MongoPropietario',
   connector: 'mongodb',
-  url: 'mongodb+srv://Equipo2:Equipo2@tallermecanico.vtkntdd.mongodb.net/Usuariol?retryWrites=true&w=majority',
+  url: 'mongodb+srv://Equipo2:Equipo2@tallermecanico.vtkntdd.mongodb.net/Taller?retryWrites=true&w=majority',
   host: '',
   port: 0,
   user: '',
