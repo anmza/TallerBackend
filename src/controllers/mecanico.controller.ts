@@ -1,30 +1,30 @@
+import {service} from '@loopback/core';
 import {
   Count,
   CountSchema,
   Filter,
   FilterExcludingWhere,
   repository,
-  Where,
+  Where
 } from '@loopback/repository';
 import {
-  post,
-  param,
-  get,
-  getModelSchemaRef,
-  patch,
-  put,
-  del,
-  requestBody,
-  response,
+  del, get,
+  getModelSchemaRef, param, patch, post, put, requestBody,
+  response
 } from '@loopback/rest';
+import fetch from 'node-fetch';
+import {Llaves} from '../config/llaves';
 import {Mecanico} from '../models';
 import {MecanicoRepository} from '../repositories';
+import {AutenticacionService} from '../services';
 
 export class MecanicoController {
   constructor(
     @repository(MecanicoRepository)
-    public mecanicoRepository : MecanicoRepository,
-  ) {}
+    public mecanicoRepository: MecanicoRepository,
+    @service(AutenticacionService)
+    public servicioAutenticacion: AutenticacionService
+  ) { }
 
   @post('/mecanicos')
   @response(200, {
@@ -44,7 +44,23 @@ export class MecanicoController {
     })
     mecanico: Omit<Mecanico, 'Id'>,
   ): Promise<Mecanico> {
-    return this.mecanicoRepository.create(mecanico);
+
+    let clave = this.servicioAutenticacion.GenerarClave();
+    let claveSifrada = this.servicioAutenticacion.CifrarClave(clave);
+    mecanico.Contrasenia = claveSifrada
+    let p = await this.mecanicoRepository.create(mecanico);
+
+    let destino = mecanico.Correo;
+    let asunto = 'Datos de registro en la plataforma mecanico';
+    let contenido = `Hola ${mecanico.Nombre} ${mecanico.Apellido} su nombre de usuario es: ${mecanico.Correo} y su contraseña es: ${clave}`;
+
+    fetch(`${Llaves.urlServicioNotificaciones}/email?destino=${destino}&asunto=${asunto}&contenido=${contenido}`)
+      .then((data: any) => {
+
+        console.log(data)
+      })
+
+    return p;
   }
 
   @get('/mecanicos/count')

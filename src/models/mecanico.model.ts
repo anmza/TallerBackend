@@ -1,4 +1,4 @@
-import {Entity, model, property, hasMany} from '@loopback/repository';
+import {Entity, hasMany, model, property} from '@loopback/repository';
 import {Revision} from './revision.model';
 
 @model()
@@ -48,7 +48,7 @@ export class Mecanico extends Entity {
 
   @property({
     type: 'string',
-    required: true,
+    required: false,
   })
   Contrasenia: string;
 
