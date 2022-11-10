@@ -1,4 +1,5 @@
 import {authenticate} from '@loopback/authentication';
+import {service} from '@loopback/core';
 import {
   Count,
   CountSchema,
@@ -14,13 +15,17 @@ import {
 } from '@loopback/rest';
 import {Vehiculo} from '../models';
 import {VehiculoRepository} from '../repositories';
+import {AutenticacionService} from '../services';
 
 
-@authenticate("userProp")
+//@authenticate("userProp")
 export class VehiculoController {
   constructor(
     @repository(VehiculoRepository)
     public vehiculoRepository: VehiculoRepository,
+
+    @service(AutenticacionService)
+    public servicioAutenticacion: AutenticacionService,
   ) { }
 
 
@@ -68,8 +73,7 @@ export class VehiculoController {
       },
     },
   })
-  async find(
-    @param.filter(Vehiculo) filter?: Filter<Vehiculo>,
+  async find(@param.filter(Vehiculo) filter?: Filter<Vehiculo>,
   ): Promise<Vehiculo[]> {
     return this.vehiculoRepository.find(filter);
   }
@@ -145,4 +149,6 @@ export class VehiculoController {
   async deleteById(@param.path.string('id') id: string): Promise<void> {
     await this.vehiculoRepository.deleteById(id);
   }
+
+
 }

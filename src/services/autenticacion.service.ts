@@ -1,8 +1,8 @@
 import { /* inject, */ BindingScope, injectable} from '@loopback/core';
 import {repository} from '@loopback/repository';
 import {Llaves} from '../config/llaves';
-import {Propietario} from '../models';
-import {PropietarioRepository} from '../repositories';
+import {JefeOperaciones, Propietario} from '../models';
+import {JefeOperacionesRepository, PropietarioRepository, VehiculoRepository} from '../repositories';
 const generator = require("password-generator");
 const cryptoJS = require("crypto-js");
 const jwt = require("jsonwebtoken");
@@ -12,7 +12,13 @@ export class AutenticacionService {
   constructor(
 
     @repository(PropietarioRepository)
-    public propietarioRepository: PropietarioRepository
+    public propietarioRepository: PropietarioRepository,
+
+    @repository(VehiculoRepository)
+    public vehiculoRepository: VehiculoRepository,
+
+    @repository(JefeOperacionesRepository)
+    public jefeoperacionesRepository: JefeOperacionesRepository
 
   ) { }
 
@@ -46,13 +52,42 @@ export class AutenticacionService {
 
   }
 
-  GenerarTokenJWT(propietario: Propietario) {
+  IdentificarJefeOperaciones(Usuario: string, Clave: string) {
+    try {
+      let p = this.jefeoperacionesRepository.findOne({where: {Correo: Usuario, Contrasenia: Clave}});
+      if (p) {
+        return p;
+      }
+      return false;
+    } catch {
+      return false;
+    }
+
+  }
+
+  GenerarTokenPropietario(propietario: Propietario) {
 
     let token = jwt.sign({
       data: {
         id: propietario.Id,
         correo: propietario.Correo,
         nombre: propietario.Nombre + " " + propietario.Apellido,
+
+
+      }
+
+    },
+      Llaves.clavejwt)
+    return token
+  }
+
+  GenerarTokenJefeOperaciones(jefeOperaciones: JefeOperaciones) {
+
+    let token = jwt.sign({
+      data: {
+        id: jefeOperaciones.Id,
+        correo: jefeOperaciones.Correo,
+        nombre: jefeOperaciones.Nombre + " " + jefeOperaciones.Apellido,
 
 
       }

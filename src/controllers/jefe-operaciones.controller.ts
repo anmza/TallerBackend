@@ -9,12 +9,12 @@ import {
 } from '@loopback/repository';
 import {
   del, get,
-  getModelSchemaRef, param, patch, post, put, requestBody,
+  getModelSchemaRef, HttpErrors, param, patch, post, put, requestBody,
   response
 } from '@loopback/rest';
 import fetch from 'node-fetch';
 import {Llaves} from '../config/llaves';
-import {JefeOperaciones} from '../models';
+import {Credenciales, JefeOperaciones} from '../models';
 import {JefeOperacionesRepository} from '../repositories';
 import {AutenticacionService} from '../services';
 
@@ -25,6 +25,41 @@ export class JefeOperacionesController {
     @service(AutenticacionService)
     public servicioAutenticacion: AutenticacionService
   ) { }
+
+  @post("/identificarJefe", {
+
+    responses: {
+
+      '200': {
+        description: "Identificacion Jefe de Operaciones"
+      }
+    }
+
+  })
+  async identificarJefeOperaciones(
+
+    @requestBody() credenciales: Credenciales
+
+  ) {
+
+    let p = await this.servicioAutenticacion.IdentificarJefeOperaciones(credenciales.Usuario, credenciales.Clave);
+    if (p) {
+      let token = this.servicioAutenticacion.GenerarTokenJefeOperaciones(p);
+      return {
+        datos: {
+          nombre: p.Nombre,
+          correo: p.Correo,
+          id: p.Id
+        },
+        tk: token
+      }
+    } else {
+
+      throw new HttpErrors[401]("Datos Invalidos");
+    }
+
+  }
+
 
   @post('/jefe-operaciones')
   @response(200, {

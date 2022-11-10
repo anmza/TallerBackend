@@ -11,10 +11,10 @@ export class Mecanico extends Entity {
   Id?: string;
 
   @property({
-    type: 'string',
+    type: 'number',
     required: true,
   })
-  Documento: string;
+  Documento: number;
 
   @property({
     type: 'string',
@@ -29,10 +29,10 @@ export class Mecanico extends Entity {
   Apellido: string;
 
   @property({
-    type: 'string',
+    type: 'number',
     required: true,
   })
-  Telefono: string;
+  Telefono: number;
 
   @property({
     type: 'string',
