@@ -1,4 +1,4 @@
-import {Entity, model, property, hasMany} from '@loopback/repository';
+import {Entity, hasMany, model, property} from '@loopback/repository';
 import {Revision} from './revision.model';
 
 @model()
@@ -11,10 +11,10 @@ export class Mecanico extends Entity {
   Id?: string;
 
   @property({
-    type: 'string',
+    type: 'number',
     required: true,
   })
-  Documento: string;
+  Documento: number;
 
   @property({
     type: 'string',
@@ -29,10 +29,10 @@ export class Mecanico extends Entity {
   Apellido: string;
 
   @property({
-    type: 'string',
+    type: 'number',
     required: true,
   })
-  Telefono: string;
+  Telefono: number;
 
   @property({
     type: 'string',
@@ -48,7 +48,7 @@ export class Mecanico extends Entity {
 
   @property({
     type: 'string',
-    required: true,
+    required: false,
   })
   Contrasenia: string;
 

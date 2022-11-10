@@ -1,7 +1,7 @@
-import {Entity, model, property, belongsTo, hasOne} from '@loopback/repository';
+import {belongsTo, Entity, hasOne, model, property} from '@loopback/repository';
 import {Propietario} from './propietario.model';
-import {SolicitudRevision} from './solicitud-revision.model';
 import {Revision} from './revision.model';
+import {SolicitudRevision} from './solicitud-revision.model';
 
 @model()
 export class Vehiculo extends Entity {
@@ -25,10 +25,11 @@ export class Vehiculo extends Entity {
   Marca: string;
 
   @property({
-    type: 'string',
+    type: 'number',
     required: true,
+
   })
-  Modelo: string;
+  Modelo: number;
 
   @property({
     type: 'number',

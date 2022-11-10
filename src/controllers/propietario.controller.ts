@@ -45,7 +45,7 @@ export class PropietarioController {
 
     let p = await this.servicioAutenticacion.IdentificarPropietario(credenciales.Usuario, credenciales.Clave);
     if (p) {
-      let token = this.servicioAutenticacion.GenerarTokenJWT(p);
+      let token = this.servicioAutenticacion.GenerarTokenPropietario(p);
       return {
         datos: {
           nombre: p.Nombre,
@@ -89,8 +89,8 @@ export class PropietarioController {
     // Notificar al usuario
 
     let destino = propietario.Correo;
-    let asunto = 'Registro en la plataforma';
-    let contenido = `Hola ${propietario.Nombre}, su nombre de usuario es ${propietario.Correo}, y su contraseña es ${clave}`;
+    let asunto = 'Registro de Usuario en la plataforma de Taller Mecanico';
+    let contenido = `Hola ${propietario.Nombre} ${propietario.Apellido}, su nombre de usuario es ${propietario.Correo}, y su contraseña es ${clave}`;
 
     fetch(`${Llaves.urlServicioNotificaciones}/email?destino=${destino}&asunto=${asunto}&contenido=${contenido}`)
       .then((data: any) => {

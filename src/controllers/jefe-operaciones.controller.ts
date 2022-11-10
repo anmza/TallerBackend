@@ -1,30 +1,65 @@
+import {service} from '@loopback/core';
 import {
   Count,
   CountSchema,
   Filter,
   FilterExcludingWhere,
   repository,
-  Where,
+  Where
 } from '@loopback/repository';
 import {
-  post,
-  param,
-  get,
-  getModelSchemaRef,
-  patch,
-  put,
-  del,
-  requestBody,
-  response,
+  del, get,
+  getModelSchemaRef, HttpErrors, param, patch, post, put, requestBody,
+  response
 } from '@loopback/rest';
-import {JefeOperaciones} from '../models';
+import fetch from 'node-fetch';
+import {Llaves} from '../config/llaves';
+import {Credenciales, JefeOperaciones} from '../models';
 import {JefeOperacionesRepository} from '../repositories';
+import {AutenticacionService} from '../services';
 
 export class JefeOperacionesController {
   constructor(
     @repository(JefeOperacionesRepository)
-    public jefeOperacionesRepository : JefeOperacionesRepository,
-  ) {}
+    public jefeOperacionesRepository: JefeOperacionesRepository,
+    @service(AutenticacionService)
+    public servicioAutenticacion: AutenticacionService
+  ) { }
+
+  @post("/identificarJefe", {
+
+    responses: {
+
+      '200': {
+        description: "Identificacion Jefe de Operaciones"
+      }
+    }
+
+  })
+  async identificarJefeOperaciones(
+
+    @requestBody() credenciales: Credenciales
+
+  ) {
+
+    let p = await this.servicioAutenticacion.IdentificarJefeOperaciones(credenciales.Usuario, credenciales.Clave);
+    if (p) {
+      let token = this.servicioAutenticacion.GenerarTokenJefeOperaciones(p);
+      return {
+        datos: {
+          nombre: p.Nombre,
+          correo: p.Correo,
+          id: p.Id
+        },
+        tk: token
+      }
+    } else {
+
+      throw new HttpErrors[401]("Datos Invalidos");
+    }
+
+  }
+
 
   @post('/jefe-operaciones')
   @response(200, {
@@ -44,7 +79,23 @@ export class JefeOperacionesController {
     })
     jefeOperaciones: Omit<JefeOperaciones, 'Id'>,
   ): Promise<JefeOperaciones> {
-    return this.jefeOperacionesRepository.create(jefeOperaciones);
+    let clave = this.servicioAutenticacion.GenerarClave();
+    let claveCifrada = this.servicioAutenticacion.CifrarClave(clave);
+    jefeOperaciones.Contrasenia = claveCifrada
+    let p = await this.jefeOperacionesRepository.create(jefeOperaciones);
+
+    let destino = jefeOperaciones.Correo;
+    let asunto = 'Datos de registro en la plataforma Jefe de operaciones';
+    let contenido = `Hola ${jefeOperaciones.Nombre} ${jefeOperaciones.Apellido} su nombre de usuario es: ${jefeOperaciones.Correo} y su contraseña es: ${clave}`;
+
+    fetch(`${Llaves.urlServicioNotificaciones}/email?destino=${destino}&asunto=${asunto}&contenido=${contenido}`)
+      .then((data: any) => {
+
+        console.log(data)
+
+      })
+
+    return p;
   }
 
   @get('/jefe-operaciones/count')
